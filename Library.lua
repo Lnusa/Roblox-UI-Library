@@ -126,7 +126,6 @@ function Library:CreateNumericInput(labelText, placeholder, callback)
     self.ElementCount = self.ElementCount + 1
 end
 
--- BARU: FUNGSI MEMBUAT TOGGLE (SAKELAR ON/OFF LUAR BIASA)
 function Library:CreateToggle(labelText, callback)
     if not self.MainFrame then return end
 
@@ -150,7 +149,7 @@ function Library:CreateToggle(labelText, callback)
     local ToggleButton = Instance.new("TextButton")
     ToggleButton.Size = UDim2.new(0, 60, 0, 28)
     ToggleButton.Position = UDim2.new(0, 180, 0, 3)
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40) -- Default Merah (OFF)
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
     ToggleButton.Text = "OFF"
     ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     ToggleButton.Font = Enum.Font.SourceSansBold
@@ -161,15 +160,14 @@ function Library:CreateToggle(labelText, callback)
     ToggleButton.MouseButton1Click:Connect(function()
         isToggled = not isToggled
         if isToggled then
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(40, 160, 80) -- Hijau (ON)
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(40, 160, 80)
             ToggleButton.Text = "ON"
         else
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40) -- Merah (OFF)
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
             ToggleButton.Text = "OFF"
         end
         callback(isToggled)
-    ```lua
-    end)
+    end) -- << Bagian ini sudah diperbaiki bersih
 
     self.ElementCount = self.ElementCount + 1
 end
