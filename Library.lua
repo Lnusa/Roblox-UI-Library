@@ -1,7 +1,6 @@
 local Library = {}
 
 function Library:CreateWindow(titleText)
-    -- DETEKSI TEMPAT PENYIMPANAN UI YANG AMAN UNTUK SEMUA EXECUTOR
     local MainParent = nil
     local success, coregui = pcall(function() return game:GetService("CoreGui") end)
     
@@ -11,7 +10,6 @@ function Library:CreateWindow(titleText)
         MainParent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
     end
     
-    -- Hapus UI lama jika sudah ada agar tidak menumpuk saat di-execute ulang
     if MainParent:FindFirstChild("MyCustomHackMenu") then
         MainParent.MyCustomHackMenu:Destroy()
     end
@@ -31,13 +29,48 @@ function Library:CreateWindow(titleText)
     MainFrame.Parent = ScreenGui
 
     local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, 0, 0, 40)
+    Title.Size = UDim2.new(1, -40, 0, 40) -- Menyisakan ruang untuk tombol lipat
     Title.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
     Title.Text = titleText
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.Font = Enum.Font.SourceSansBold
     Title.TextSize = 14
     Title.Parent = MainFrame
+
+    -- FITUR BARU: TOMBOL MINIMIZE / MENGECILKAN WINDOW
+    local MinimizeButton = Instance.new("TextButton")
+    MinimizeButton.Size = UDim2.new(0, 40, 0, 40)
+    MinimizeButton.Position = UDim2.new(1, -40, 0, 0)
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
+    MinimizeButton.Text = "-"
+    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MinimizeButton.Font = Enum.Font.SourceSansBold
+    MinimizeButton.TextSize = 16
+    MinimizeButton.Parent = MainFrame
+
+    local isMinimized = false
+    local originalSize = MainFrame.Size
+
+    MinimizeButton.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        if isMinimized then
+            MainFrame.Size = UDim2.new(0, 280, 0, 40) -- Menyusut menjadi hanya bar judul
+            MinimizeButton.Text = "+"
+            for _, child in pairs(MainFrame:GetChildren()) do
+                if child ~= Title and child ~= MinimizeButton and child:IsA("GuiObject") then
+                    child.Visible = false
+                end
+            end
+        else
+            MainFrame.Size = originalSize
+            MinimizeButton.Text = "-"
+            for _, child in pairs(MainFrame:GetChildren()) do
+                if child:IsA("GuiObject") then
+                    child.Visible = true
+                end
+            end
+        end
+    end)
 
     self.MainFrame = MainFrame
     self.ElementCount = 0
@@ -182,13 +215,12 @@ function Library:CreateToggle(labelText, callback)
     self.ElementCount = self.ElementCount + 1
 end
 
--- BUTTON TUTUP MENU MANDIRI (DITAMBAHKAN DI BAWAH INSTANCE)
 function Library:CreateCloseButton()
     if not self.MainFrame then return end
     
     local Button = Instance.new("TextButton")
     Button.Size = UDim2.new(0, 240, 0, 30)
-    Button.Position = UDim2.new(0, 20, 1, -45) -- Selalu nempel di dasar frame utama
+    Button.Position = UDim2.new(0, 20, 1, -45)
     Button.BackgroundColor3 = Color3.fromRGB(150, 35, 35)
     Button.Text = "Close Exploit Menu"
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -198,7 +230,6 @@ function Library:CreateCloseButton()
 
     Button.MouseButton1Click:Connect(function()
         self.MainFrame.Parent:Destroy()
-        print("Menu berhasil dihancurkan.")
     end)
 end
 
