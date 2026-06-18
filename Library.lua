@@ -12,8 +12,9 @@ function Library:CreateWindow(titleText)
     ScreenGui.ResetOnSpawn = false
 
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 280, 0, 420) -- Diperlebar sedikit agar muat dropdown teks
-    MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
+    -- Dipertinggi menjadi 520 agar muat fitur Item Manager + Dungeon Drop
+    MainFrame.Size = UDim2.new(0, 280, 0, 520) 
+    MainFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
     MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
     MainFrame.BorderSizePixel = 2
     MainFrame.Active = true
@@ -35,7 +36,6 @@ function Library:CreateWindow(titleText)
     return MainFrame
 end
 
--- FUNGSI BARU: MEMBUAT DROPDOWN / PILIHAN ITEM
 function Library:CreateDropdown(labelText, options, callback)
     if not self.MainFrame then return end
 
@@ -60,7 +60,7 @@ function Library:CreateDropdown(labelText, options, callback)
     Button.Size = UDim2.new(0, 140, 1, 0)
     Button.Position = UDim2.new(0, 100, 0, 0)
     Button.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
-    Button.Text = options[1].Name -- Default pilihan pertama
+    Button.Text = options[1].Name
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
     Button.Font = Enum.Font.SourceSans
     Button.TextSize = 13
@@ -77,7 +77,6 @@ function Library:CreateDropdown(labelText, options, callback)
     self.ElementCount = self.ElementCount + 1
 end
 
--- FUNGSI BARU: MEMBUAT INPUT KHUSUS NOMOR (VALIDASI OTOMATIS)
 function Library:CreateNumericInput(labelText, placeholder, callback)
     if not self.MainFrame then return end
 
@@ -109,9 +108,8 @@ function Library:CreateNumericInput(labelText, placeholder, callback)
     TextBox.TextSize = 13
     TextBox.Parent = Container
 
-    -- Validasi Real-time: Hapus paksa jika ada huruf atau karakter spesial
     TextBox:GetPropertyChangedSignal("Text"):Connect(function()
-        local cleanText = TextBox.Text:gsub("%D", "") -- Hanya menyisakan digit [0-9]
+        local cleanText = TextBox.Text:gsub("%D", "")
         if TextBox.Text ~= cleanText then
             TextBox.Text = cleanText
         end
@@ -127,6 +125,37 @@ function Library:CreateNumericInput(labelText, placeholder, callback)
     end)
 
     self.ElementCount = self.ElementCount + 1
+end
+
+-- BARU: PEMBATAS VISUAL ANTAR SEKSI MENU
+function Library:CreateSeparator(text)
+    if not self.MainFrame then return end
+    
+    local SeparatorFrame = Instance.new("Frame")
+    local yPosition = 50 + (self.ElementCount * 45)
+    SeparatorFrame.Size = UDim2.new(0, 240, 0, 25)
+    SeparatorFrame.Position = UDim2.new(0, 20, 0, yPosition)
+    SeparatorFrame.BackgroundTransparency = 1
+    SeparatorFrame.Parent = self.MainFrame
+    
+    local Line = Instance.new("Frame")
+    Line.Size = UDim2.new(1, 0, 0, 1)
+    Line.Position = UDim2.new(0, 0, 0.5, 0)
+    Line.BackgroundColor3 = Color3.fromRGB(70, 70, 75)
+    Line.BorderSizePixel = 0
+    Line.Parent = SeparatorFrame
+    
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(0, 120, 1, 0)
+    Label.Position = UDim2.new(0.5, -60, 0, 0)
+    Label.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    Label.Text = text:upper()
+    Label.TextColor3 = Color3.fromRGB(120, 120, 130)
+    Label.Font = Enum.Font.SourceSansBold
+    Label.TextSize = 11
+    Label.Parent = SeparatorFrame
+    
+    self.ElementCount = self.ElementCount + 0.7 -- Jeda spasial yang lebih rapat
 end
 
 function Library:CreateButton(text, color, callback)
