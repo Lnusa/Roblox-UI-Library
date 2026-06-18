@@ -12,7 +12,6 @@ function Library:CreateWindow(titleText)
     ScreenGui.ResetOnSpawn = false
 
     local MainFrame = Instance.new("Frame")
-    -- Dipertinggi menjadi 520 agar muat fitur Item Manager + Dungeon Drop
     MainFrame.Size = UDim2.new(0, 280, 0, 520) 
     MainFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
     MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
@@ -127,7 +126,54 @@ function Library:CreateNumericInput(labelText, placeholder, callback)
     self.ElementCount = self.ElementCount + 1
 end
 
--- BARU: PEMBATAS VISUAL ANTAR SEKSI MENU
+-- BARU: FUNGSI MEMBUAT TOGGLE (SAKELAR ON/OFF LUAR BIASA)
+function Library:CreateToggle(labelText, callback)
+    if not self.MainFrame then return end
+
+    local Container = Instance.new("Frame")
+    local yPosition = 50 + (self.ElementCount * 45)
+    Container.Size = UDim2.new(0, 240, 0, 35)
+    Container.Position = UDim2.new(0, 20, 0, yPosition)
+    Container.BackgroundTransparency = 1
+    Container.Parent = self.MainFrame
+
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(0, 160, 1, 0)
+    Label.Text = labelText
+    Label.TextColor3 = Color3.fromRGB(230, 230, 230)
+    Label.Font = Enum.Font.SourceSansBold
+    Label.TextSize = 13
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.BackgroundTransparency = 1
+    Label.Parent = Container
+
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Size = UDim2.new(0, 60, 0, 28)
+    ToggleButton.Position = UDim2.new(0, 180, 0, 3)
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40) -- Default Merah (OFF)
+    ToggleButton.Text = "OFF"
+    ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleButton.Font = Enum.Font.SourceSansBold
+    ToggleButton.TextSize = 12
+    ToggleButton.Parent = Container
+
+    local isToggled = false
+    ToggleButton.MouseButton1Click:Connect(function()
+        isToggled = not isToggled
+        if isToggled then
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(40, 160, 80) -- Hijau (ON)
+            ToggleButton.Text = "ON"
+        else
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40) -- Merah (OFF)
+            ToggleButton.Text = "OFF"
+        end
+        callback(isToggled)
+    ```lua
+    end)
+
+    self.ElementCount = self.ElementCount + 1
+end
+
 function Library:CreateSeparator(text)
     if not self.MainFrame then return end
     
@@ -155,7 +201,7 @@ function Library:CreateSeparator(text)
     Label.TextSize = 11
     Label.Parent = SeparatorFrame
     
-    self.ElementCount = self.ElementCount + 0.7 -- Jeda spasial yang lebih rapat
+    self.ElementCount = self.ElementCount + 0.7
 end
 
 function Library:CreateButton(text, color, callback)
