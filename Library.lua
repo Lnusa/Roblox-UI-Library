@@ -1,14 +1,24 @@
 local Library = {}
 
 function Library:CreateWindow(titleText)
-    local CoreGui = game:GetService("CoreGui")
-    if CoreGui:FindFirstChild("MyCustomHackMenu") then
-        CoreGui.MyCustomHackMenu:Destroy()
+    -- DETEKSI TEMPAT PENYIMPANAN UI YANG AMAN UNTUK SEMUA EXECUTOR
+    local MainParent = nil
+    local success, coregui = pcall(function() return game:GetService("CoreGui") end)
+    
+    if success and coregui then
+        MainParent = coregui
+    else
+        MainParent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    end
+    
+    -- Hapus UI lama jika sudah ada agar tidak menumpuk saat di-execute ulang
+    if MainParent:FindFirstChild("MyCustomHackMenu") then
+        MainParent.MyCustomHackMenu:Destroy()
     end
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "MyCustomHackMenu"
-    ScreenGui.Parent = CoreGui
+    ScreenGui.Parent = MainParent
     ScreenGui.ResetOnSpawn = false
 
     local MainFrame = Instance.new("Frame")
@@ -167,9 +177,29 @@ function Library:CreateToggle(labelText, callback)
             ToggleButton.Text = "OFF"
         end
         callback(isToggled)
-    end) -- << Bagian ini sudah diperbaiki bersih
+    end)
 
     self.ElementCount = self.ElementCount + 1
+end
+
+-- BUTTON TUTUP MENU MANDIRI (DITAMBAHKAN DI BAWAH INSTANCE)
+function Library:CreateCloseButton()
+    if not self.MainFrame then return end
+    
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(0, 240, 0, 30)
+    Button.Position = UDim2.new(0, 20, 1, -45) -- Selalu nempel di dasar frame utama
+    Button.BackgroundColor3 = Color3.fromRGB(150, 35, 35)
+    Button.Text = "Close Exploit Menu"
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.Font = Enum.Font.SourceSansBold
+    Button.TextSize = 13
+    Button.Parent = self.MainFrame
+
+    Button.MouseButton1Click:Connect(function()
+        self.MainFrame.Parent:Destroy()
+        print("Menu berhasil dihancurkan.")
+    end)
 end
 
 function Library:CreateSeparator(text)
