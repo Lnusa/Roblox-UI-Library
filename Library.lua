@@ -19,9 +19,8 @@ function Library:CreateWindow(titleText)
     ScreenGui.Parent = MainParent
     ScreenGui.ResetOnSpawn = false
 
-    -- Ukuran tinggi disesuaikan agar pas dengan navigasi tab bawah
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 280, 0, 420) 
+    MainFrame.Size = UDim2.new(0, 280, 0, 400) -- Ukuran pas dan optimal
     MainFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
     MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
     MainFrame.BorderSizePixel = 2
@@ -29,8 +28,9 @@ function Library:CreateWindow(titleText)
     MainFrame.Draggable = true
     MainFrame.Parent = ScreenGui
 
+    -- TITLE BAR (Dipersempit menjadi -75 untuk ruang 2 tombol di kanan)
     local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, -40, 0, 40)
+    Title.Size = UDim2.new(1, -75, 0, 40)
     Title.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
     Title.Text = titleText
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -38,9 +38,10 @@ function Library:CreateWindow(titleText)
     Title.TextSize = 14
     Title.Parent = MainFrame
 
+    -- TOMBOL MINIMIZE [-]
     local MinimizeButton = Instance.new("TextButton")
-    MinimizeButton.Size = UDim2.new(0, 40, 0, 40)
-    MinimizeButton.Position = UDim2.new(1, -40, 0, 0)
+    MinimizeButton.Size = UDim2.new(0, 35, 0, 40)
+    MinimizeButton.Position = UDim2.new(1, -75, 0, 0)
     MinimizeButton.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
     MinimizeButton.Text = "-"
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -48,14 +49,25 @@ function Library:CreateWindow(titleText)
     MinimizeButton.TextSize = 16
     MinimizeButton.Parent = MainFrame
 
-    -- CONTAINER UTAMA UNTUK HALAMAN TAB
+    -- TOMBOL CLOSE [X] DI GELETAK SEBELAH MINIMIZE
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Size = UDim2.new(0, 40, 0, 40)
+    CloseButton.Position = UDim2.new(1, -40, 0, 0)
+    CloseButton.BackgroundColor3 = Color3.fromRGB(150, 35, 35)
+    CloseButton.Text = "X"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.Font = Enum.Font.SourceSansBold
+    CloseButton.TextSize = 14
+    CloseButton.Parent = MainFrame
+
+    -- CONTAINER HALAMAN (Diperluas ke bawah karena ruang close button lama sudah bebas)
     local PageContainer = Instance.new("Frame")
-    PageContainer.Size = UDim2.new(1, 0, 1, -85) -- Menyisakan ruang untuk title dan tab bar
+    PageContainer.Size = UDim2.new(1, 0, 1, -85) 
     PageContainer.Position = UDim2.new(0, 0, 0, 40)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = MainFrame
 
-    -- BARIS NAVIGASI TAB DI BAGIAN BAWAH
+    -- BARIS NAVIGASI TAB BAWAH
     local TabBar = Instance.new("Frame")
     TabBar.Size = UDim2.new(1, 0, 0, 45)
     TabBar.Position = UDim2.new(0, 0, 1, -45)
@@ -68,6 +80,7 @@ function Library:CreateWindow(titleText)
     TabBarLayout.SortOrder = Enum.SortOrder.LayoutOrder
     TabBarLayout.Parent = TabBar
 
+    -- AKSI TOMBOL MINIMIZE
     local isMinimized = false
     local originalSize = MainFrame.Size
 
@@ -86,6 +99,11 @@ function Library:CreateWindow(titleText)
         end
     end)
 
+    -- AKSI TOMBOL TUTUP MENU [X]
+    CloseButton.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+
     self.MainFrame = MainFrame
     self.PageContainer = PageContainer
     self.TabBar = TabBar
@@ -102,7 +120,6 @@ function Library:CreateTab(tabName)
     self.TabCount = self.TabCount + 1
     local currentTabOrder = self.TabCount
 
-    -- Pembuatan objek Halaman (Page)
     local Page = Instance.new("ScrollingFrame")
     Page.Size = UDim2.new(1, 0, 1, 0)
     Page.BackgroundTransparency = 1
@@ -118,14 +135,12 @@ function Library:CreateTab(tabName)
     PageLayout.Padding = UDim.new(0, 8)
     PageLayout.Parent = Page
     
-    -- Padding bagian dalam agar elemen tidak menempel batas atas
     local UIPadding = Instance.new("UIPadding")
     UIPadding.PaddingTop = UDim.new(0, 10)
     UIPadding.Parent = Page
 
-    -- Tombol Navigasi Tab
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(0.5, 0, 1, 0) -- Otomatis membagi rata jika ada 2 tab
+    TabButton.Size = UDim2.new(0.5, 0, 1, 0)
     TabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
     TabButton.BorderSizePixel = 0
     TabButton.Text = tabName:upper()
@@ -135,7 +150,6 @@ function Library:CreateTab(tabName)
     TabButton.LayoutOrder = currentTabOrder
     TabButton.Parent = self.TabBar
 
-    -- Logika perpindahan halaman saat tab diklik
     local function SwitchToThisTab()
         for _, t in pairs(self.Tabs) do
             t.Page.Visible = false
@@ -146,27 +160,21 @@ function Library:CreateTab(tabName)
         TabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
         TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
         self.ActivePage = Page
-        
-        -- Sesuaikan CanvasSize otomatis berdasarkan jumlah elemen di dalam tab
         Page.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 20)
     end
 
     TabButton.MouseButton1Click:Connect(SwitchToThisTab)
-    
     table.insert(self.Tabs, {Page = Page, Button = TabButton})
     
-    -- Jika ini tab pertama, langsung aktifkan secara otomatis
     if #self.Tabs == 1 then
         SwitchToThisTab()
     end
 
-    -- Update ukuran tombol tab secara dinamis menyesuaikan total tab yang ada
     local buttonWidth = 1 / #self.Tabs
     for _, t in pairs(self.Tabs) do
         t.Button.Size = UDim2.new(buttonWidth, 0, 1, 0)
     end
 
-    -- Membuat object helper khusus agar elemen bisa dimasukkan langsung ke halaman ini
     local TabObject = {ElementCount = 0, Page = Page, PageLayout = PageLayout}
     
     function TabObject:CreateToggle(labelText, callback)
@@ -306,23 +314,9 @@ function Library:CreateTab(tabName)
     return TabObject
 end
 
+-- Fungsi dikosongkan karena tombol close sudah otomatis dibuat di CreateWindow
 function Library:CreateCloseButton()
-    if not self.MainFrame then return end
-    
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(0, 240, 0, 30)
-    Button.BackgroundColor3 = Color3.fromRGB(150, 35, 35)
-    Button.Text = "Close Exploit Menu"
-    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Button.Font = Enum.Font.SourceSansBold
-    Button.TextSize = 13
-    -- Nempel permanen di dasar Frame utama, di atas TabBar sedikit
-    Button.Position = UDim2.new(0, 20, 1, -82)
-    Button.Parent = self.MainFrame
-    
-    Button.MouseButton1Click:Connect(function()
-        self.MainFrame.Parent:Destroy()
-    end)
+    return nil
 end
 
 return Library
