@@ -3,189 +3,179 @@ local Library = {}
 function Library:CreateWindow(titleText)
     local MainParent = nil
     local success, coregui = pcall(function() return game:GetService("CoreGui") end)
+    if success and coregui then MainParent = coregui else MainParent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui") end
     
-    if success and coregui then
-        MainParent = coregui
-    else
-        MainParent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-    end
-    
-    if MainParent:FindFirstChild("MyCustomHackMenu") then
-        MainParent.MyCustomHackMenu:Destroy()
-    end
+    if MainParent:FindFirstChild("TrashTycoonUI") then MainParent.TrashTycoonUI:Destroy() end
 
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "MyCustomHackMenu"
+    ScreenGui.Name = "TrashTycoonUI"
     ScreenGui.Parent = MainParent
     ScreenGui.ResetOnSpawn = false
 
+    -- FRAME UTAMA (Dibuat agak lebar untuk mengakomodasi Sidebar samping)
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 280, 0, 400) -- Ukuran pas dan optimal
-    MainFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    MainFrame.BorderSizePixel = 2
+    MainFrame.Size = UDim2.new(0, 380, 0, 320)
+    MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    MainFrame.BorderSizePixel = 0
     MainFrame.Active = true
     MainFrame.Draggable = true
     MainFrame.Parent = ScreenGui
 
-    -- TITLE BAR (Dipersempit menjadi -75 untuk ruang 2 tombol di kanan)
+    -- Membuat rounded corner biar estetik mirip premium hub
+    local MainCorner = Instance.new("UICorner")
+    MainCorner.CornerRadius = UDim.new(0, 8)
+    MainCorner.Parent = MainFrame
+
+    -- TITLE BAR TOP
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Size = UDim2.new(1, 0, 0, 35)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(28, 28, 33)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Parent = MainFrame
+    
+    local TopCorner = Instance.new("UICorner")
+    TopCorner.CornerRadius = UDim.new(0, 8)
+    TopCorner.Parent = TitleBar
+
     local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, -75, 0, 40)
-    Title.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    Title.Size = UDim2.new(1, -50, 1, 0)
+    Title.Position = UDim2.new(0, 12, 0, 0)
+    Title.BackgroundTransparency = 1
     Title.Text = titleText
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.Font = Enum.Font.SourceSansBold
     Title.TextSize = 14
-    Title.Parent = MainFrame
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Parent = TitleBar
 
-    -- TOMBOL MINIMIZE [-]
-    local MinimizeButton = Instance.new("TextButton")
-    MinimizeButton.Size = UDim2.new(0, 35, 0, 40)
-    MinimizeButton.Position = UDim2.new(1, -75, 0, 0)
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
-    MinimizeButton.Text = "-"
-    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.Font = Enum.Font.SourceSansBold
-    MinimizeButton.TextSize = 16
-    MinimizeButton.Parent = MainFrame
-
-    -- TOMBOL CLOSE [X] DI GELETAK SEBELAH MINIMIZE
     local CloseButton = Instance.new("TextButton")
-    CloseButton.Size = UDim2.new(0, 40, 0, 40)
-    CloseButton.Position = UDim2.new(1, -40, 0, 0)
-    CloseButton.BackgroundColor3 = Color3.fromRGB(150, 35, 35)
-    CloseButton.Text = "X"
-    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.Size = UDim2.new(0, 35, 1, 0)
+    CloseButton.Position = UDim2.new(1, -35, 0, 0)
+    CloseButton.BackgroundTransparency = 1
+    CloseButton.Text = "✕"
+    CloseButton.TextColor3 = Color3.fromRGB(180, 180, 180)
     CloseButton.Font = Enum.Font.SourceSansBold
     CloseButton.TextSize = 14
-    CloseButton.Parent = MainFrame
+    CloseButton.Parent = TitleBar
+    CloseButton.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
-    -- CONTAINER HALAMAN (Diperluas ke bawah karena ruang close button lama sudah bebas)
+    -- SIDEBAR NAVIGASI (KIRI)
+    local Sidebar = Instance.new("ScrollingFrame")
+    Sidebar.Size = UDim2.new(0, 100, 1, -35)
+    Sidebar.Position = UDim2.new(0, 0, 0, 35)
+    Sidebar.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    Sidebar.BorderSizePixel = 0
+    Sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Sidebar.ScrollBarThickness = 2
+    Sidebar.Parent = MainFrame
+
+    local SideLayout = Instance.new("UIListLayout")
+    SideLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    SideLayout.Padding = UDim.new(0, 2)
+    SideLayout.Parent = Sidebar
+
+    -- CONTAINER UTAMA HALAMAN (KANAN)
     local PageContainer = Instance.new("Frame")
-    PageContainer.Size = UDim2.new(1, 0, 1, -85) 
-    PageContainer.Position = UDim2.new(0, 0, 0, 40)
+    PageContainer.Size = UDim2.new(1, -105, 1, -40)
+    PageContainer.Position = UDim2.new(0, 105, 0, 38)
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = MainFrame
 
-    -- BARIS NAVIGASI TAB BAWAH
-    local TabBar = Instance.new("Frame")
-    TabBar.Size = UDim2.new(1, 0, 0, 45)
-    TabBar.Position = UDim2.new(0, 0, 1, -45)
-    TabBar.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    TabBar.BorderSizePixel = 0
-    TabBar.Parent = MainFrame
-
-    local TabBarLayout = Instance.new("UIListLayout")
-    TabBarLayout.FillDirection = Enum.FillDirection.Horizontal
-    TabBarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    TabBarLayout.Parent = TabBar
-
-    -- AKSI TOMBOL MINIMIZE
-    local isMinimized = false
-    local originalSize = MainFrame.Size
-
-    MinimizeButton.MouseButton1Click:Connect(function()
-        isMinimized = not isMinimized
-        if isMinimized then
-            MainFrame.Size = UDim2.new(0, 280, 0, 40)
-            MinimizeButton.Text = "+"
-            PageContainer.Visible = false
-            TabBar.Visible = false
-        else
-            MainFrame.Size = originalSize
-            MinimizeButton.Text = "-"
-            PageContainer.Visible = true
-            TabBar.Visible = true
-        end
-    end)
-
-    -- AKSI TOMBOL TUTUP MENU [X]
-    CloseButton.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-    end)
-
-    self.MainFrame = MainFrame
     self.PageContainer = PageContainer
-    self.TabBar = TabBar
+    self.Sidebar = Sidebar
     self.Tabs = {}
-    self.ActivePage = nil
     self.TabCount = 0
-    
     return MainFrame
 end
 
 function Library:CreateTab(tabName)
-    if not self.PageContainer or not self.TabBar then return end
-    
     self.TabCount = self.TabCount + 1
-    local currentTabOrder = self.TabCount
+    local currentOrder = self.TabCount
 
+    -- Halaman Konten Kanan
     local Page = Instance.new("ScrollingFrame")
     Page.Size = UDim2.new(1, 0, 1, 0)
     Page.BackgroundTransparency = 1
     Page.BorderSizePixel = 0
     Page.ScrollBarThickness = 4
-    Page.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 85)
+    Page.ScrollBarImageColor3 = Color3.fromRGB(70, 70, 75)
     Page.Visible = false
     Page.Parent = self.PageContainer
 
     local PageLayout = Instance.new("UIListLayout")
     PageLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    PageLayout.Padding = UDim.new(0, 8)
+    PageLayout.Padding = UDim.new(0, 6)
     PageLayout.Parent = Page
-    
-    local UIPadding = Instance.new("UIPadding")
-    UIPadding.PaddingTop = UDim.new(0, 10)
-    UIPadding.Parent = Page
 
+    -- Tombol Menu di Kiri
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(0.5, 0, 1, 0)
-    TabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+    TabButton.Size = UDim2.new(1, 0, 0, 32)
+    TabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
     TabButton.BorderSizePixel = 0
-    TabButton.Text = tabName:upper()
-    TabButton.TextColor3 = Color3.fromRGB(150, 150, 155)
+    TabButton.Text = "  " .. tabName
+    TabButton.TextColor3 = Color3.fromRGB(160, 160, 165)
     TabButton.Font = Enum.Font.SourceSansBold
-    TabButton.TextSize = 13
-    TabButton.LayoutOrder = currentTabOrder
-    TabButton.Parent = self.TabBar
+    TabButton.TextSize = 12
+    TabButton.TextXAlignment = Enum.TextXAlignment.Left
+    TabButton.LayoutOrder = currentOrder
+    TabButton.Parent = self.Sidebar
 
-    local function SwitchToThisTab()
+    local function SwitchTab()
         for _, t in pairs(self.Tabs) do
             t.Page.Visible = false
-            t.Button.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-            t.Button.TextColor3 = Color3.fromRGB(150, 150, 155)
+            t.Button.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+            t.Button.TextColor3 = Color3.fromRGB(160, 160, 165)
         end
         Page.Visible = true
-        TabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+        TabButton.BackgroundColor3 = Color3.fromRGB(33, 33, 40)
         TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        self.ActivePage = Page
-        Page.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 20)
+        Page.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 15)
     end
 
-    TabButton.MouseButton1Click:Connect(SwitchToThisTab)
+    TabButton.MouseButton1Click:Connect(SwitchTab)
     table.insert(self.Tabs, {Page = Page, Button = TabButton})
-    
-    if #self.Tabs == 1 then
-        SwitchToThisTab()
-    end
 
-    local buttonWidth = 1 / #self.Tabs
-    for _, t in pairs(self.Tabs) do
-        t.Button.Size = UDim2.new(buttonWidth, 0, 1, 0)
-    end
+    if #self.Tabs == 1 then SwitchTab() end
+    self.Sidebar.CanvasSize = UDim2.new(0, 0, 0, SideLayout.AbsoluteContentSize.Y)
 
     local TabObject = {ElementCount = 0, Page = Page, PageLayout = PageLayout}
-    
+
+    -- 🟢 SEKARANG FIX: FUNGSI LABEL RESMI DISEDIAKAN!
+    function TabObject:CreateLabel(text)
+        local Label = Instance.new("TextLabel")
+        Label.Size = UDim2.new(0, 250, 0, 50) -- Tinggi otomatis muat multi-line text
+        Label.BackgroundTransparency = 1
+        Label.Text = text
+        Label.TextColor3 = Color3.fromRGB(210, 210, 215)
+        Label.Font = Enum.Font.SourceSans
+        Label.TextSize = 13
+        Label.TextXAlignment = Enum.TextXAlignment.Left
+        Label.TextYAlignment = Enum.TextYAlignment.Top
+        Label.LayoutOrder = self.ElementCount
+        Label.Parent = self.Page
+
+        self.ElementCount = self.ElementCount + 1
+        self.Page.CanvasSize = UDim2.new(0, 0, 0, self.PageLayout.AbsoluteContentSize.Y + 15)
+
+        -- Me-return object agar text-nya bisa diupdate via fungsi eksternal
+        local LabelControl = {}
+        function LabelControl:UpdateText(newText)
+            Label.Text = newText
+        end
+        return LabelControl
+    end
+
     function TabObject:CreateToggle(labelText, callback)
         local Container = Instance.new("Frame")
-        Container.Size = UDim2.new(0, 240, 0, 35)
+        Container.Size = UDim2.new(0, 250, 0, 30)
         Container.BackgroundTransparency = 1
         Container.LayoutOrder = self.ElementCount
         Container.Parent = self.Page
 
         local Label = Instance.new("TextLabel")
-        Label.Size = UDim2.new(0, 160, 1, 0)
+        Label.Size = UDim2.new(0, 180, 1, 0)
         Label.Text = labelText
         Label.TextColor3 = Color3.fromRGB(230, 230, 230)
         Label.Font = Enum.Font.SourceSansBold
@@ -195,41 +185,36 @@ function Library:CreateTab(tabName)
         Label.Parent = Container
 
         local ToggleButton = Instance.new("TextButton")
-        ToggleButton.Size = UDim2.new(0, 60, 0, 28)
-        ToggleButton.Position = UDim2.new(0, 180, 0, 3)
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+        ToggleButton.Size = UDim2.new(0, 50, 0, 24)
+        ToggleButton.Position = UDim2.new(0, 195, 0, 3)
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(160, 40, 40)
         ToggleButton.Text = "OFF"
         ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
         ToggleButton.Font = Enum.Font.SourceSansBold
-        ToggleButton.TextSize = 12
+        ToggleButton.TextSize = 11
         ToggleButton.Parent = Container
 
         local isToggled = false
         ToggleButton.MouseButton1Click:Connect(function()
             isToggled = not isToggled
-            if isToggled then
-                ToggleButton.BackgroundColor3 = Color3.fromRGB(40, 160, 80)
-                ToggleButton.Text = "ON"
-            else
-                ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-                ToggleButton.Text = "OFF"
-            end
+            ToggleButton.BackgroundColor3 = isToggled and Color3.fromRGB(40, 150, 75) or Color3.fromRGB(160, 40, 40)
+            ToggleButton.Text = isToggled and "ON" or "OFF"
             callback(isToggled)
         end)
 
         self.ElementCount = self.ElementCount + 1
-        self.Page.CanvasSize = UDim2.new(0, 0, 0, self.PageLayout.AbsoluteContentSize.Y + 20)
+        self.Page.CanvasSize = UDim2.new(0, 0, 0, self.PageLayout.AbsoluteContentSize.Y + 15)
     end
 
     function TabObject:CreateNumericInput(labelText, placeholder, callback)
         local Container = Instance.new("Frame")
-        Container.Size = UDim2.new(0, 240, 0, 35)
+        Container.Size = UDim2.new(0, 250, 0, 30)
         Container.BackgroundTransparency = 1
         Container.LayoutOrder = self.ElementCount
         Container.Parent = self.Page
 
         local Label = Instance.new("TextLabel")
-        Label.Size = UDim2.new(0, 100, 1, 0)
+        Label.Size = UDim2.new(0, 90, 1, 0)
         Label.Text = labelText
         Label.TextColor3 = Color3.fromRGB(200, 200, 200)
         Label.Font = Enum.Font.SourceSansBold
@@ -239,84 +224,75 @@ function Library:CreateTab(tabName)
         Label.Parent = Container
 
         local TextBox = Instance.new("TextBox")
-        TextBox.Size = UDim2.new(0, 140, 1, 0)
-        TextBox.Position = UDim2.new(0, 100, 0, 0)
-        TextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+        TextBox.Size = UDim2.new(0, 150, 1, 0)
+        TextBox.Position = UDim2.new(0, 95, 0, 0)
+        TextBox.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
         TextBox.Text = ""
         TextBox.PlaceholderText = placeholder
         TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
         TextBox.Font = Enum.Font.SourceSans
-        TextBox.TextSize = 13
+        TextBox.TextSize = 12
         TextBox.Parent = Container
 
         TextBox:GetPropertyChangedSignal("Text"):Connect(function()
-            local cleanText = TextBox.Text:gsub("[^%d%.%-]", "")
-            if TextBox.Text ~= cleanText then
-                TextBox.Text = cleanText
-            end
+            local clean = TextBox.Text:gsub("[^%d%.%-]", "")
+            if TextBox.Text ~= clean then TextBox.Text = clean end
         end)
 
         TextBox.FocusLost:Connect(function()
-            local num = tonumber(TextBox.Text)
-            callback(num or 0)
+            callback(tonumber(TextBox.Text) or 0)
         end)
 
         self.ElementCount = self.ElementCount + 1
-        self.Page.CanvasSize = UDim2.new(0, 0, 0, self.PageLayout.AbsoluteContentSize.Y + 20)
+        self.Page.CanvasSize = UDim2.new(0, 0, 0, self.PageLayout.AbsoluteContentSize.Y + 15)
     end
 
     function TabObject:CreateButton(text, color, callback)
         local Button = Instance.new("TextButton")
-        Button.Size = UDim2.new(0, 240, 0, 35)
+        Button.Size = UDim2.new(0, 250, 0, 32)
         Button.BackgroundColor3 = color
         Button.Text = text
         Button.TextColor3 = Color3.fromRGB(255, 255, 255)
         Button.Font = Enum.Font.SourceSansBold
-        Button.TextSize = 14
+        Button.TextSize = 13
         Button.LayoutOrder = self.ElementCount
         Button.Parent = self.Page
 
         Button.MouseButton1Click:Connect(callback)
         
         self.ElementCount = self.ElementCount + 1
-        self.Page.CanvasSize = UDim2.new(0, 0, 0, self.PageLayout.AbsoluteContentSize.Y + 20)
+        self.Page.CanvasSize = UDim2.new(0, 0, 0, self.PageLayout.AbsoluteContentSize.Y + 15)
         return Button
     end
 
     function TabObject:CreateSeparator(text)
-        local SeparatorFrame = Instance.new("Frame")
-        SeparatorFrame.Size = UDim2.new(0, 240, 0, 25)
-        SeparatorFrame.BackgroundTransparency = 1
-        SeparatorFrame.LayoutOrder = self.ElementCount
-        SeparatorFrame.Parent = self.Page
+        local Sep = Instance.new("Frame")
+        Sep.Size = UDim2.new(0, 250, 0, 20)
+        Sep.BackgroundTransparency = 1
+        Sep.LayoutOrder = self.ElementCount
+        Sep.Parent = self.Page
         
         local Line = Instance.new("Frame")
         Line.Size = UDim2.new(1, 0, 0, 1)
         Line.Position = UDim2.new(0, 0, 0.5, 0)
-        Line.BackgroundColor3 = Color3.fromRGB(70, 70, 75)
-        Line.BorderSizePixel = 0
-        Line.Parent = SeparatorFrame
+        Line.BackgroundColor3 = Color3.fromRGB(55, 55, 60)
+        Line.Parent = Sep
         
-        local Label = Instance.new("TextLabel")
-        Label.Size = UDim2.new(0, 120, 1, 0)
-        Label.Position = UDim2.new(0.5, -60, 0, 0)
-        Label.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-        Label.Text = text:upper()
-        Label.TextColor3 = Color3.fromRGB(120, 120, 130)
-        Label.Font = Enum.Font.SourceSansBold
-        Label.TextSize = 11
-        Label.Parent = SeparatorFrame
+        local Lbl = Instance.new("TextLabel")
+        Lbl.Size = UDim2.new(0, 100, 1, 0)
+        Lbl.Position = UDim2.new(0.5, -50, 0, 0)
+        Lbl.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+        Lbl.Text = text:upper()
+        Lbl.TextColor3 = Color3.fromRGB(110, 110, 115)
+        Lbl.Font = Enum.Font.SourceSansBold
+        Lbl.TextSize = 10
+        Lbl.Parent = Sep
         
         self.ElementCount = self.ElementCount + 1
-        self.Page.CanvasSize = UDim2.new(0, 0, 0, self.PageLayout.AbsoluteContentSize.Y + 20)
+        self.Page.CanvasSize = UDim2.new(0, 0, 0, self.PageLayout.AbsoluteContentSize.Y + 15)
     end
 
     return TabObject
-end
-
--- Fungsi dikosongkan karena tombol close sudah otomatis dibuat di CreateWindow
-function Library:CreateCloseButton()
-    return nil
 end
 
 return Library
